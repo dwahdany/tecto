@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tectonic_version:
+        description: "Upstream tectonic version (e.g. 0.16.9). Leave blank to use latest."
+        required: false
+  schedule:
+    # Daily: check upstream for a new release and publish if we're behind.
+    - cron: "0 6 * * *"
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      should_release: ${{ steps.resolve.outputs.should_release }}
+    steps:
+      - id: resolve
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.tectonic_version }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_VERSION:-}" ]; then
+            version="$INPUT_VERSION"
+          else
+            tag=$(curl -sfL https://api.github.com/repos/tectonic-typesetting/tectonic/releases/latest | jq -r .tag_name)
+            version="${tag#tectonic@}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          code=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/tecto/$version/json")
+          if [ "$code" = "404" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Upstream version: $version (already on PyPI: $([ "$code" = "200" ] && echo yes || echo no))"
+
+  build:
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - macosx_11_0_arm64
+          - macosx_10_12_x86_64
+          - manylinux2014_x86_64
+          - musllinux_1_2_x86_64
+          - musllinux_1_2_aarch64
+          - win_amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install build
+
+      - name: Pin upstream version
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("pyproject.toml")
+          v = "${{ needs.check.outputs.version }}"
+          p.write_text(re.sub(r'^version = ".*"', f'version = "{v}"', p.read_text(), count=1, flags=re.M))
+          PY
+
+      - name: Build wheel
+        env:
+          TECTO_TARGET: ${{ matrix.target }}
+        run: python -m build --wheel
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.target }}
+          path: dist/*.whl
+
+  publish:
+    needs: [check, build]
+    if: needs.check.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheel-*
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true

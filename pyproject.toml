@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tecto"
+version = "0.16.9"
+description = "Tectonic typesetting engine, packaged as prebuilt binary wheels for pip/uvx"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Dariush Wahdany", email = "dw@wasc.io" }]
+keywords = ["tex", "latex", "xetex", "tectonic", "typesetting"]
+classifiers = [
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+  "Topic :: Text Processing :: Markup :: LaTeX",
+]
+
+[project.urls]
+Homepage = "https://tectonic-typesetting.github.io/"
+Upstream = "https://github.com/tectonic-typesetting/tectonic"
+Issues = "https://github.com/tectonic-typesetting/tectonic/issues"
+
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"

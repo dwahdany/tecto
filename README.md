@@ -3,17 +3,31 @@
 Prebuilt [Tectonic](https://tectonic-typesetting.github.io/) binary wheels for
 pip and uv.
 
+One-off run (no install):
+
 ```sh
+uvx tecto mydoc.tex        # compiles to mydoc.pdf
 uvx tecto --help
-uvx tecto -X compile mydoc.tex
 ```
 
-Or install into an environment:
+Install globally with `uv` — adds both `tecto` and `tectonic` to your PATH:
+
+```sh
+uv tool install tecto
+tectonic mydoc.tex         # or: tecto mydoc.tex
+```
+
+Or via pip into an environment:
 
 ```sh
 pip install tecto
-tectonic -X compile mydoc.tex   # or: tecto -X compile mydoc.tex
+tectonic mydoc.tex
 ```
+
+For multi-document projects with a `Tectonic.toml` manifest, use V2 mode:
+`uvx tecto -X new myproj`, then `uvx tecto -X build`. See the
+[upstream docs](https://tectonic-typesetting.github.io/book/latest/) for
+details.
 
 ## What this is
 

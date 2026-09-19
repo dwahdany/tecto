@@ -62,9 +62,7 @@ TECTO_TARGET=manylinux2014_aarch64 python -m build --wheel
 ```
 
 The ARM64 glibc workflow builds and tests the wheel on Ubuntu and uploads it
-as an artifact. For an existing PyPI version, maintainers can select
-`force_release` when manually running the Release workflow to backfill
-missing wheels. Publishing still requires authorization for the PyPI project.
+as an artifact.
 
 ## Relationship to upstream
 

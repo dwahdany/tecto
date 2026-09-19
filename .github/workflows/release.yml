@@ -7,7 +7,7 @@ on:
         description: "Upstream tectonic version (e.g. 0.16.9). Leave blank to use latest."
         required: false
       backfill:
-        description: "Rebuild a version already on PyPI to publish wheels it is missing."
+        description: "Rebuild a version already on PyPI to publish wheels it is missing. PyPI rejects new files on a release older than 14 days."
         type: boolean
         default: false
   schedule:

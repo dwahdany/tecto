@@ -23,7 +23,6 @@ PLATFORMS: dict[str, tuple[str, str]] = {
     "macosx_11_0_arm64":     ("aarch64-apple-darwin",       "tar.gz"),
     "macosx_10_12_x86_64":   ("x86_64-apple-darwin",        "tar.gz"),
     "manylinux2014_x86_64":  ("x86_64-unknown-linux-gnu",   "tar.gz"),
-    # The upstream ARM64 musl executable is static and also runs on glibc.
     "manylinux2014_aarch64": ("aarch64-unknown-linux-musl", "tar.gz"),
     "musllinux_1_2_x86_64":  ("x86_64-unknown-linux-musl",  "tar.gz"),
     "musllinux_1_2_aarch64": ("aarch64-unknown-linux-musl", "tar.gz"),

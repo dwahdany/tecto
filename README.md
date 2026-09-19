@@ -51,19 +51,6 @@ Versions track upstream tectonic versions exactly.
 Other platforms listed in the upstream release (32-bit, armv7) are not
 currently published; open an issue if you need one.
 
-The ARM64 glibc wheel packages the upstream statically linked musl executable.
-It does not require musl to be installed on the host.
-
-To build this wheel locally:
-
-```sh
-python -m pip install build
-TECTO_TARGET=manylinux2014_aarch64 python -m build --wheel
-```
-
-The ARM64 glibc workflow builds and tests the wheel on Ubuntu and uploads it
-as an artifact.
-
 ## Relationship to upstream
 
 This is an unofficial packaging project. Bug reports about `tectonic` itself

@@ -45,11 +45,26 @@ Versions track upstream tectonic versions exactly.
 ## Supported platforms
 
 - macOS: arm64 (Apple Silicon), x86_64
-- Linux: x86_64 (glibc + musl), aarch64 (musl)
+- Linux: x86_64 (glibc + musl), aarch64 (glibc + musl)
 - Windows: x86_64
 
 Other platforms listed in the upstream release (32-bit, armv7) are not
 currently published; open an issue if you need one.
+
+The ARM64 glibc wheel packages the upstream statically linked musl executable.
+It does not require musl to be installed on the host.
+
+To build this wheel locally:
+
+```sh
+python -m pip install build
+TECTO_TARGET=manylinux2014_aarch64 python -m build --wheel
+```
+
+The ARM64 glibc workflow builds and tests the wheel on Ubuntu and uploads it
+as an artifact. For an existing PyPI version, maintainers can select
+`force_release` when manually running the Release workflow to backfill
+missing wheels. Publishing still requires authorization for the PyPI project.
 
 ## Relationship to upstream
 

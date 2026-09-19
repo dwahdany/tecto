@@ -1,0 +1,44 @@
+name: ARM64 glibc
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install build uv
+      - name: Build wheel
+        env:
+          TECTO_TARGET: manylinux2014_aarch64
+        run: python -m build --wheel
+      - name: Install and compile on glibc
+        run: |
+          set -euo pipefail
+          python -m pip install dist/*manylinux2014_aarch64.whl
+          binary=$(command -v tectonic)
+          readelf -l "$binary" > /tmp/tectonic-program-headers
+          readelf -d "$binary" > /tmp/tectonic-dynamic-section
+          if grep -Eq 'INTERP' /tmp/tectonic-program-headers || grep -q '(NEEDED)' /tmp/tectonic-dynamic-section; then
+            echo 'ARM64 executable must remain statically linked'
+            exit 1
+          fi
+          tectonic --version
+          tecto --version
+          uvx --from "$(echo dist/*manylinux2014_aarch64.whl)" tecto --version
+          printf '%s\n' '\documentclass{article}' '\begin{document}' 'ARM64 glibc works.' '\end{document}' > smoke.tex
+          tecto -X compile smoke.tex
+          test -s smoke.pdf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-manylinux2014_aarch64
+          path: dist/*.whl

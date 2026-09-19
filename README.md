@@ -45,7 +45,7 @@ Versions track upstream tectonic versions exactly.
 ## Supported platforms
 
 - macOS: arm64 (Apple Silicon), x86_64
-- Linux: x86_64 (glibc + musl), aarch64 (musl)
+- Linux: x86_64 (glibc + musl), aarch64 (glibc + musl)
 - Windows: x86_64
 
 Other platforms listed in the upstream release (32-bit, armv7) are not

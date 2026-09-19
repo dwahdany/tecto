@@ -6,6 +6,10 @@ on:
       tectonic_version:
         description: "Upstream tectonic version (e.g. 0.16.9). Leave blank to use latest."
         required: false
+      backfill:
+        description: "Rebuild a version already on PyPI to publish wheels it is missing."
+        type: boolean
+        default: false
   schedule:
     # Daily: check upstream for a new release and publish if we're behind.
     - cron: "0 6 * * *"
@@ -24,6 +28,7 @@ jobs:
       - id: resolve
         env:
           INPUT_VERSION: ${{ github.event.inputs.tectonic_version }}
+          BACKFILL: ${{ github.event.inputs.backfill }}
         run: |
           set -euo pipefail
           if [ -n "${INPUT_VERSION:-}" ]; then
@@ -35,7 +40,9 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
           code=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/tecto/$version/json")
-          if [ "$code" = "404" ]; then
+          # Backfill reruns an existing version; publish uses skip-existing, so
+          # only wheels PyPI is missing get uploaded.
+          if [ "$code" = "404" ] || [ "${BACKFILL:-}" = "true" ]; then
             echo "should_release=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_release=false" >> "$GITHUB_OUTPUT"
